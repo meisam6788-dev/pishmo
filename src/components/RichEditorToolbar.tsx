@@ -176,7 +176,7 @@ const RichEditorToolbar: React.FC<RichEditorProps> = ({ title, content, onChange
                     </View>
 
                     {/* 🚀 حل مشکل رفتن زیر کیبورد در اندروید */}
-                    <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={Platform.OS === 'android' ? 25 : 0} style={{ flex: 1 }}>
+                    <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={Platform.OS === 'android' ? 4 : 0} style={{ flex: 1 }}>
                         <RichEditor
                             ref={richText}
                             initialContentHTML={content}
