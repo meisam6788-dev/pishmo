@@ -24,7 +24,6 @@ const gregorianToJalali = (gy: number, gm: number, gd: number) => {
     return { jy, jm, jd };
 };
 
-// 🚀 قابلیت نمایش ساعت به سیستم تاریخ اضافه شد
 export const toShamsi = (dateInput: string | Date | undefined, includeTime: boolean = false) => {
     if (!dateInput) return '---';
     try {
@@ -37,7 +36,7 @@ export const toShamsi = (dateInput: string | Date | undefined, includeTime: bool
         
         if (includeTime && dateString.includes('T')) {
             const timePart = dateString.split('T')[1];
-            const hm = timePart.substring(0, 5); // فقط ساعت و دقیقه را می‌گیرد
+            const hm = timePart.substring(0, 5);
             result += ` - ساعت ${hm}`;
         }
         return result;
@@ -117,8 +116,8 @@ const SwipeableOrderCard = React.memo(({ item, onOpenModal, onLongPress, onCompl
     const itemsCount = item.line_items?.reduce((acc: number, cur: any) => acc + (cur.quantity || 1), 0) || 0;
 
     return (
-        <View style={{ marginBottom: 12, position: 'relative' }}>
-            <View style={styles.swipeBackground}><Feather name="check-circle" size={28} color="#fff" /><Text style={styles.swipeTxt}>تکمیل سریع</Text></View>
+        <View style={{ marginBottom: 6, position: 'relative' }}>
+            <View style={styles.swipeBackground}><Feather name="check-circle" size={20} color="#fff" /><Text style={styles.swipeTxt}>تکمیل سریع</Text></View>
             <Animated.View style={{ transform: [{ translateX: pan }] }} {...panResponder.panHandlers}>
                 <TouchableOpacity style={[styles.orderCard, isSelected && { borderColor: '#3b82f6', borderWidth: 2 }]} onPress={onOpenModal} onLongPress={onLongPress} activeOpacity={0.9}>
                     <View style={styles.cardRow}>
@@ -136,6 +135,7 @@ const SwipeableOrderCard = React.memo(({ item, onOpenModal, onLongPress, onCompl
 
 const filterTabs = [
     { id: 'all', label: 'همه سفارشات' },
+    { id: 'completed', label: 'تکمیل شده' },
     { id: 'processing', label: 'در حال انجام' },
     { id: 'pending', label: 'در انتظار پرداخت' },
     { id: 'on-hold', label: 'در انتظار بررسی' },
@@ -148,9 +148,9 @@ export const OrdersScreen: React.FC = () => {
 
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false); // 🚀 اضافه شدن استیت لودینگ برای اسکرول پایین
+    const [loadingMore, setLoadingMore] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
-    const [isSilentUpdating, setIsSilentUpdating] = useState(false); // 🚀 استیت برای آپدیت بی‌صدای کش
+    const [isSilentUpdating, setIsSilentUpdating] = useState(false);
 
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [page, setPage] = useState(1);
@@ -187,6 +187,10 @@ export const OrdersScreen: React.FC = () => {
     const [createOrderVisible, setCreateOrderVisible] = useState(false);
     const [newOrderCustomer, setNewOrderCustomer] = useState({ first_name: '', last_name: '', phone: '', state: '', city: '', address_1: '', postcode: '' });
     
+    // استیت‌های جدید برای ثبت سفارش دستی
+    const [posCustomerNote, setPosCustomerNote] = useState('');
+    const [posPaymentMethod, setPosPaymentMethod] = useState('');
+
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -204,7 +208,6 @@ export const OrdersScreen: React.FC = () => {
 
     const filterScrollRef = useRef<ScrollView>(null);
 
-    // 🚀 راه‌اندازی اولیه صفحه با حافظه کش (سرعت جت)
     useEffect(() => {
         if (!isMounted.current) {
             isMounted.current = true;
@@ -216,14 +219,12 @@ export const OrdersScreen: React.FC = () => {
                         if (parsedData && parsedData.length > 0) {
                             setOrders(parsedData);
                             hasCachedData.current = true;
-                            setLoading(false); // نمایش آنی اطلاعات
+                            setLoading(false);
                         }
                     }
                 } catch (e) {}
 
-                // بعد از باز شدن روان انیمیشن‌ها، درخواست سرور می‌زنیم
                 InteractionManager.runAfterInteractions(() => {
-                    // نیازی به کار اضافی نیست، useEffect پایینی (fetchOrders) خودش کار را شروع می‌کند
                 });
             };
             initScreen();
@@ -231,12 +232,11 @@ export const OrdersScreen: React.FC = () => {
     }, []);
 
     const fetchOrders = useCallback(async (pageNum = 1, isRefresh = false, searchStr = globalSearchQuery) => {
-        // مدیریت لودینگ بر اساس کش
         if (!isRefresh && pageNum === 1) {
             if (hasCachedData.current) setIsSilentUpdating(true);
             else setLoading(true);
         }
-        if (pageNum > 1) setLoadingMore(true); // 🚀 تریگر شدن انیمیشن اسکرول پایین
+        if (pageNum > 1) setLoadingMore(true);
 
         try {
             const client = createWooClient();
@@ -251,7 +251,6 @@ export const OrdersScreen: React.FC = () => {
             if (pageNum === 1 || isRefresh) { 
                 setOrders(fetchedOrders); 
                 hasCachedData.current = true;
-                // آپدیت حافظه کش
                 if (query === '' && statusFilter === 'all') {
                     await AsyncStorage.setItem('@pishmo_orders_cache', JSON.stringify(fetchedOrders));
                 }
@@ -263,7 +262,7 @@ export const OrdersScreen: React.FC = () => {
             Alert.alert('خطا', 'دریافت لیست سفارشات با مشکل مواجه شد.'); 
         } finally { 
             setLoading(false); 
-            setLoadingMore(false); // 🚀 خاموش کردن انیمیشن پایین صفحه
+            setLoadingMore(false);
             setRefreshing(false); 
             setIsSilentUpdating(false);
         }
@@ -542,7 +541,6 @@ export const OrdersScreen: React.FC = () => {
     };
     const updateCartQty = (id: number, delta: number) => { setCart(cart.map(c => { if (c.product_id === id) { const newQty = c.quantity + delta; return newQty > 0 ? { ...c, quantity: newQty } : c; } return c; })); };
     const removeProductFromCart = (id: number) => { setCart(cart.filter(c => c.product_id !== id)); };
-    
     const updateCartPrice = (id: number, newPrice: string) => { setCart(cart.map(c => { if (c.product_id === id) { return { ...c, price: newPrice }; } return c; })); };
 
     const cartTotalRaw = cart.reduce((sum, c) => sum + (Number(c.price || 0) * c.quantity), 0);
@@ -570,8 +568,9 @@ export const OrdersScreen: React.FC = () => {
 
             const orderPayload: any = { 
                 payment_method: 'bacs', 
-                payment_method_title: 'ثبت دستی توسط مدیر', 
+                payment_method_title: posPaymentMethod.trim() ? posPaymentMethod : 'ثبت دستی توسط مدیر', 
                 set_paid: false, 
+                customer_note: posCustomerNote,
                 billing: { ...newOrderCustomer }, 
                 shipping: { ...newOrderCustomer }, 
                 line_items: cart.map(c => ({ product_id: c.product_id, quantity: c.quantity, total: String(Number(c.price || 0) * c.quantity) })),
@@ -584,6 +583,7 @@ export const OrdersScreen: React.FC = () => {
             
             setCreateOrderVisible(false); setCart([]); setPosDiscount(''); setPosDiscountType('fixed'); 
             setPosShippingTitle(''); setPosShippingCost(''); setPosFeeTitle(''); setPosFeeCost('');
+            setPosCustomerNote(''); setPosPaymentMethod('');
             setNewOrderCustomer({ first_name: '', last_name: '', phone: '', state: '', city: '', address_1: '', postcode: '' }); 
             setPage(1); fetchOrders(1, true);
         } catch (error) { Alert.alert('خطا', 'ثبت سفارش با مشکل مواجه شد.'); } finally { setIsSubmittingOrder(false); }
@@ -604,21 +604,24 @@ export const OrdersScreen: React.FC = () => {
                 </View>
             ) : (
                 <View style={styles.header}>
-                    <TouchableOpacity style={styles.addOrderBtn} onPress={() => setCreateOrderVisible(true)}>
-                        <Feather name="plus" size={16} color="#fff" />
-                        <Text style={styles.addOrderBtnTxt}>ثبت سفارش</Text>
-                    </TouchableOpacity>
                     <Text style={styles.headerTitle}>سفارشات فروشگاه</Text>
                 </View>
             )}
 
             <View style={styles.globalSearchContainer}>
-                <View style={styles.globalSearchBox}>
-                    <Feather name="search" size={18} color="#64748b" style={styles.globalSearchIcon} />
-                    <TextInput style={styles.globalSearchInput} placeholder="جستجو با کد، نام..." placeholderTextColor="#94a3b8" value={globalSearchQuery} onChangeText={handleGlobalSearch} textAlign="right" returnKeyType="search" />
+                <View style={styles.searchRowWrapper}>
+                    <View style={styles.globalSearchBox}>
+                        <Feather name="search" size={18} color="#64748b" style={styles.globalSearchIcon} />
+                        <TextInput style={styles.globalSearchInput} placeholder="جستجو با کد، نام..." placeholderTextColor="#94a3b8" value={globalSearchQuery} onChangeText={handleGlobalSearch} textAlign="right" returnKeyType="search" />
+                    </View>
+                    
+                    {!isSelectionMode && (
+                        <TouchableOpacity style={styles.addOrderBtnOnlyIcon} onPress={() => setCreateOrderVisible(true)}>
+                            <Feather name="plus" size={24} color="#ffffff" />
+                        </TouchableOpacity>
+                    )}
                 </View>
-                
-                {/* 🚀 نشانگر آپدیت بی‌صدا برای کاربر */}
+
                 {isSilentUpdating && (
                     <View style={{ flexDirection: 'row-reverse', justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
                         <ActivityIndicator size="small" color="#EC5B38" style={{ marginLeft: 5 }} />
@@ -651,7 +654,6 @@ export const OrdersScreen: React.FC = () => {
                     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setPage(1); fetchOrders(1, true); }} colors={['#0f172a']} />}
                     onEndReached={handleLoadMore}
                     onEndReachedThreshold={0.1}
-                    // 🚀 اضافه شدن لودینگ حرفه‌ای به انتهای لیست (برای دریافت 15 تای بعدی)
                     ListFooterComponent={loadingMore ? (
                         <View style={styles.footerLoader}>
                             <ActivityIndicator size="large" color="#EC5B38" />
@@ -680,8 +682,8 @@ export const OrdersScreen: React.FC = () => {
             <Modal visible={createOrderVisible} animationType="slide" onRequestClose={() => setCreateOrderVisible(false)}>
                 <View style={styles.posContainer}>
                     <View style={styles.posHeader}>
+                        <Text style={styles.posHeaderTitle}>ثبت سفارش ‌جدید (مدیر)</Text>
                         <TouchableOpacity onPress={() => setCreateOrderVisible(false)}><Feather name="x" size={24} color="#64748b" /></TouchableOpacity>
-                        <Text style={styles.posHeaderTitle}>ثبت سفارش جدید (مدیر)</Text>
                     </View>
                     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, paddingBottom: 50 }} keyboardShouldPersistTaps="handled">
                         <View style={styles.posSection}>
@@ -693,6 +695,7 @@ export const OrdersScreen: React.FC = () => {
                             <TextInput style={styles.posInput} placeholder="شهر" value={newOrderCustomer.city} onChangeText={(t) => setNewOrderCustomer({ ...newOrderCustomer, city: t })} textAlign="right" />
                             <TextInput style={[styles.posInput, { height: 60 }]} multiline placeholder="آدرس کامل" value={newOrderCustomer.address_1} onChangeText={(t) => setNewOrderCustomer({ ...newOrderCustomer, address_1: t })} textAlign="right" />
                             <TextInput style={styles.posInput} placeholder="کد پستی" value={newOrderCustomer.postcode} onChangeText={(t) => setNewOrderCustomer({ ...newOrderCustomer, postcode: t })} keyboardType="numeric" textAlign="right" />
+                            <TextInput style={[styles.posInput, { height: 60 }]} multiline placeholder="یادداشت سفارش (اختیاری)" value={posCustomerNote} onChangeText={setPosCustomerNote} textAlign="right" />
                         </View>
                         
                         <View style={styles.posSection}>
@@ -758,6 +761,8 @@ export const OrdersScreen: React.FC = () => {
                                 <TextInput style={[styles.posInput, styles.posMaliInputHalf]} placeholder="هزینه اضافه (مثلاً بسته‌بندی)" value={posFeeTitle} onChangeText={setPosFeeTitle} textAlign="right" />
                             </View>
 
+                            <TextInput style={[styles.posInput, { marginTop: 10 }]} placeholder="نحوه پرداخت (مثال: کارت به کارت، کیف پول)" value={posPaymentMethod} onChangeText={setPosPaymentMethod} textAlign="right" />
+
                             <View style={styles.discountContainer}>
                                 <Text style={{fontSize: 12, fontWeight: 'bold', color: '#be123c', textAlign: 'right', marginBottom: 8}}>تخفیف روی کل فاکتور</Text>
                                 <View style={styles.discountTypeTabs}>
@@ -800,7 +805,6 @@ export const OrdersScreen: React.FC = () => {
                                         <Text style={styles.headerBoxId}>#{selectedOrder.id}</Text>
                                     </View>
                                     <View style={[styles.headerBoxRow, { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#e2e8f0' }]}>
-                                        {/* 🚀 اضافه شدن ساعت به تاریخ در پنجره جزئیات */}
                                         <Text style={styles.headerBoxDate}>📅 {toShamsi(selectedOrder.date_created, true)}</Text>
                                         <View style={[styles.statusBadgeMini, { backgroundColor: renderStatusBadge(selectedOrder.status).bg }]}><Text style={[styles.statusTxtMini, { color: renderStatusBadge(selectedOrder.status).color }]}>{renderStatusBadge(selectedOrder.status).label}</Text></View>
                                     </View>
@@ -958,6 +962,20 @@ export const OrdersScreen: React.FC = () => {
                                     </View>
                                 )}
 
+                                {/* ردیف هزینه‌های جانبی و کیف پول */}
+                                {selectedOrder.fee_lines && selectedOrder.fee_lines.length > 0 && selectedOrder.fee_lines.map((fee: any, idx: number) => {
+                                    const feeTotal = parseFloat(fee.total || '0');
+                                    const isDiscount = feeTotal < 0; 
+                                    return (
+                                        <View key={idx} style={[styles.discountHighlightBox, { backgroundColor: isDiscount ? '#fdf2f8' : '#f8fafc', borderColor: isDiscount ? '#fbcfe8' : '#e2e8f0' }]}>
+                                            <Text style={[styles.discountHighlightLabel, { color: isDiscount ? '#be123c' : '#475569' }]}>{fee.name || 'هزینه جانبی / کیف پول'}</Text>
+                                            <Text style={[styles.discountHighlightValue, { color: isDiscount ? '#e11d48' : '#0f172a' }]}>
+                                                {isDiscount ? '' : '+'} {formatPrice(Math.abs(feeTotal))} تومان
+                                            </Text>
+                                        </View>
+                                    );
+                                })}
+
                                 <View style={styles.totalSummaryBox}>
                                     <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                                         <Text style={styles.totalSummaryLabel}>مبلغ کل پرداختی:</Text>
@@ -1055,7 +1073,6 @@ export const OrdersScreen: React.FC = () => {
                                     </View>
                                     <View style={{ alignItems: 'flex-end' }}>
                                         <Text style={styles.invoiceMetaLabel}>تاریخ سفارش</Text>
-                                        {/* در فاکتور هم ساعت رو اضافه کردیم */}
                                         <Text style={styles.invoiceMetaValue}>{selectedOrder ? toShamsi(selectedOrder.date_created, true) : ''}</Text>
                                     </View>
                                 </View>
@@ -1120,30 +1137,27 @@ export const OrdersScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f1f5f9' },
-    header: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#ffffff', paddingBottom: 15, paddingTop: Platform.OS === 'ios' ? 40 : 15, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: '#e2e8f0', alignItems: 'center' },
+    header: { backgroundColor: '#ffffff', paddingBottom: 10, paddingTop: Platform.OS === 'ios' ? 40 : 15, paddingHorizontal: 16 },
     headerTitle: { fontSize: 18, fontWeight: '900', color: '#0f172a', textAlign: 'right' },
-    addOrderBtn: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: '#8b5cf6', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
-    addOrderBtnTxt: { fontSize: 11, fontWeight: 'bold', color: '#fff', marginRight: 4 },
     bulkHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', backgroundColor: '#e0f2fe', paddingBottom: 15, paddingTop: Platform.OS === 'ios' ? 40 : 15, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: '#bae6fd', alignItems: 'center' },
     bulkActionBtn: { backgroundColor: '#fff', padding: 8, borderRadius: 8, marginLeft: 10, elevation: 1 },
     globalSearchContainer: { backgroundColor: '#ffffff', paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#e2e8f0' },
-    globalSearchBox: { flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 10, paddingHorizontal: 12 },
+    searchRowWrapper: { flexDirection: 'row-reverse', alignItems: 'center', gap: 10, width: '100%' },
+    globalSearchBox: { flex: 1, flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 10, paddingHorizontal: 12 },
     globalSearchInput: { flex: 1, height: 42, fontSize: 12, color: '#0f172a', textAlign: 'right', fontWeight: 'bold' },
     globalSearchIcon: { marginLeft: 8 },
+    addOrderBtnOnlyIcon: { width: 42, height: 42, backgroundColor: '#EC5B38', borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
     filterContainer: { backgroundColor: '#ffffff', borderBottomWidth: 1, borderBottomColor: '#e2e8f0' },
     filterScroll: { paddingHorizontal: 12, paddingVertical: 10, flexDirection: 'row' },
     filterBtn: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 16, backgroundColor: '#f1f5f9', marginLeft: 8 },
-    filterBtnActive: { backgroundColor: '#EC5B38' }, // 👈 برای تغییر رنگ پس‌زمینه کاروسل، این رنگ (#059669) را تغییر دهید
+    filterBtnActive: { backgroundColor: '#EC5B38' },
     filterBtnTxt: { fontSize: 11, fontWeight: 'bold', color: '#64748b', textAlign: 'center' },
     filterBtnTxtActive: { color: '#ffffff', fontWeight: '900' },
     centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     emptyTxt: { marginTop: 12, fontSize: 13, color: '#94a3b8', fontWeight: 'bold', textAlign: 'right' },
     listContainer: { padding: 12, paddingBottom: 100 },
-    
-    // 🚀 استایل‌های انیمیشن لودینگ پایین صفحه
     footerLoader: { paddingVertical: 20, alignItems: 'center', justifyContent: 'center' },
     footerLoaderTxt: { marginTop: 8, fontSize: 9, color: '#EC5B38', fontWeight: 'bold' },
-
     swipeBackground: { position: 'absolute', width: '100%', height: '100%', backgroundColor: '#10b981', borderRadius: 12, justifyContent: 'center', alignItems: 'flex-end', paddingRight: 20 },
     swipeTxt: { color: '#fff', fontWeight: 'bold', fontSize: 11, marginTop: 4 },
     selectedOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(239, 246, 255, 0.6)', borderRadius: 12, borderWidth: 2, borderColor: '#3b82f6', justifyContent: 'center', alignItems: 'center' },
@@ -1231,9 +1245,9 @@ const styles = StyleSheet.create({
     totalSummaryLabel: { fontSize: 13, fontWeight: '900', color: '#f8fafc', textAlign: 'right' },
     totalSummaryValue: { fontSize: 18, fontWeight: '900', color: '#10b981', textAlign: 'left', marginBottom: 2 },
     paymentMethodTxt: { fontSize: 12, color: '#93c5fd', textAlign: 'left', fontWeight: '900' },
-    posContainer: { flex: 1, backgroundColor: '#f1f5f9', paddingTop: Platform.OS === 'ios' ? 40 : 10 },
-    posHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', padding: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e2e8f0' },
-    posHeaderTitle: { fontSize: 16, fontWeight: '900', color: '#0f172a' },
+    posContainer: { flex: 1, backgroundColor: '#f1f5f9', paddingTop: Platform.OS === 'ios' ? 50 : 45 },
+    posHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e2e8f0', alignItems: 'center' },
+    posHeaderTitle: { fontSize: 16, fontWeight: '900', color: '#0f172a', textAlign: 'right', flex: 1, marginRight: 15 },
     posSection: { backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: '#e2e8f0' },
     posSectionTitle: { fontSize: 14, fontWeight: '900', color: '#3b82f6', textAlign: 'right', marginBottom: 12 },
     posInput: { backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 8, padding: 10, fontSize: 12, color: '#0f172a', marginBottom: 10 },

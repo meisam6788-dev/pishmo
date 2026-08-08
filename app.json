@@ -1,12 +1,13 @@
 {
   "expo": {
-    "name": "pishmo",
+    "name": "Pishmo",
     "slug": "pishmo",
-    "version": "1.1.2",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/pishmo-splash.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -14,27 +15,17 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "ir.fitla.pishmo",
-      "buildNumber": "1.1.2"
+      "supportsTablet": true
     },
     "android": {
-      "package": "ir.fitla.pishmo",
-      "versionCode": 1,
-      "softwareKeyboardLayoutMode": "resize",
-      "permissions": [
-        "android.permission.INTERNET"
-      ]
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.yourname.pishmo"
     },
     "plugins": [
-      "expo-font",
-      "expo-sharing"
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "addcfa69-6c67-4da6-8208-e08a66cf49d7"
-      }
-    },
-    "owner": "meisam6788"
+      "expo-font"
+    ]
   }
 }

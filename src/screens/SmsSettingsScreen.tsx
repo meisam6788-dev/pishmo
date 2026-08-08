@@ -249,6 +249,18 @@ export const SmsSettingsScreen: React.FC<{ onBack: () => void }> = ({ onBack }) 
                                     <TouchableOpacity onPress={() => copyTag('[tracking_code]')}>
                                         <Text style={styles.tagItem}>کد پیگیری پستی = <Text style={styles.tagHigh}>[tracking_code]</Text></Text>
                                     </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => copyTag('[total_spent]')}>
+                                         <Text style={styles.tagItem}>مجموع خرید مشتری = <Text style={styles.tagHigh}>[total_spent]</Text></Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => copyTag('[orders_count]')}>
+                                        <Text style={styles.tagItem}>تعداد کل سفارشات = <Text style={styles.tagHigh}>[orders_count]</Text></Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => copyTag('[segment]')}>
+                                        <Text style={styles.tagItem}>سطح وفاداری (VIP و...) = <Text style={styles.tagHigh}>[segment]</Text></Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => copyTag('[coupon_code]')}>
+                                        <Text style={styles.tagItem}>کد تخفیف اختصاصی = <Text style={styles.tagHigh}>[coupon_code]</Text></Text>
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         )}
