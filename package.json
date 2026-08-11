@@ -1,7 +1,7 @@
 {
   "name": "pishmo",
-  "version": "1.1.2",
-  "main": "index.ts",
+  "version": "1.1.4",
+  "main": "expo/AppEntry.js",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
     "@react-native-async-storage/async-storage": "2.2.0",
