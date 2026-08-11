@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "Pishmo",
+    "slug": "pishmo",
+    "version": "1.1.4",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fitla.pishmo"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.fitla.pishmo"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "onesignal-expo-plugin",
+        {
+          "mode": "development"
+        }
+      ],
+      "expo-secure-store",
+      "expo-sharing",
+      "expo-splash-screen"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "YOUR-EXPO-PROJECT-ID",
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": []
+            }
+          }
+        }
+      }
+    }
+  }
+}
