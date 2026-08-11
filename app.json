@@ -25,30 +25,19 @@
       },
       "package": "com.fitla.pishmo"
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
     "plugins": [
+      "expo-font",
       [
         "onesignal-expo-plugin",
         {
           "mode": "development"
         }
       ],
-      "expo-secure-store",
-      "expo-sharing",
-      "expo-splash-screen"
+      "expo-secure-store"
     ],
     "extra": {
       "eas": {
-        "projectId": "YOUR-EXPO-PROJECT-ID",
-        "build": {
-          "experimental": {
-            "ios": {
-              "appExtensions": []
-            }
-          }
-        }
+        "projectId": "addcfa69-6c67-4da6-8208-e08a66cf49d7"
       }
     }
   }
